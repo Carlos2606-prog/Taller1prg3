@@ -1,24 +1,26 @@
 package co.edu.uptc.model;
 
+import co.edu.uptc.pojo.Product;
+
 public class ManagerList {
     Node header = null;
 
     private Node createNode(String value) { return new Node(value); }
 
-    private Node returnLaNode(){
+    private Node returnLastNode(){
         Node last = header;
-        while (last.sig!= null){
-            last = last.sig;
+        while (last.next!= null){
+            last = last.next;
         }
         return last;
     }
 
-    public void addInicio(String value){
+    public void addStart(String value){
         Node aux = createNode(value);
         if (header == null){
             header = aux;
         } else {
-            aux.sig = header;
+            aux.next = header;
             header = aux;
         }
     }
@@ -27,8 +29,8 @@ public class ManagerList {
         if (header == null){
             header = aux;
         } else {
-            Node last = returnLaNode();
-            last.sig = aux;
+            Node last = returnLastNode();
+            last.next = aux;
         }
     }
 
@@ -36,7 +38,7 @@ public class ManagerList {
         Node aux = header;
         while (aux != null){
             System.out.println(aux.value + " " + aux.value.length());
-            aux = aux.sig;
+            aux = aux.next;
         }
     }
 }

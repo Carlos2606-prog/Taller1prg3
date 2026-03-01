@@ -1,167 +1,106 @@
 package co.edu.uptc.model;
 
-import co.edu.uptc.pojo.Producto;
+import co.edu.uptc.pojo.Product;
 
 public class ProductListAdapter {
     private static final String SEPARATOR = "|";
     private final ManagerList list;
+    private MyList<Product> productsList;
 
     public ProductListAdapter() {
         this.list = new ManagerList();
+        this.productsList = new MyList<>();
     }
 
-    public void addProducto(Producto producto) {
-        if (producto == null) {
+    public void addProduct(Product product) {
+        if (product == null) {
             return;
         }
-        list.addEnd(serialize(producto));
+        list.addEnd(serialize(product));
     }
 
-    public Producto[] toArray() {
-        // Contar primero
+    public Product[] toArray() {
         int count = 0;
         Node current = list.header;
         while (current != null) {
             count++;
-            current = current.sig;
+            current = current.next;
         }
 
-        // Crear array y llenar
-        Producto[] productos = new Producto[count];
+        Product[] products = new Product[count];
         current = list.header;
         int index = 0;
         while (current != null) {
-            Producto producto = deserialize(current.value);
-            if (producto != null) {
-                productos[index++] = producto;
+            Product product = deserialize(current.value);
+            if (product != null) {
+                products[index++] = product;
             }
-            current = current.sig;
+            current = current.next;
         }
-        return productos;
+        return products;
     }
 
-    public Producto[] sortedByDescripcion() {
+    public Product[] sortedByDescription() {
         if (list.header == null) {
-            return new Producto[0];
+            return new Product[0];
         }
 
-        // Clonar la lista para no modificar la original
-        ManagerList sortedList = cloneList();
+        productsList = new MyList<>(); 
         
-        // Insertion sort sobre los nodos
-        sortedList.header = insertionSort(sortedList.header);
-        
-        // Contar elementos
-        int count = 0;
-        Node current = sortedList.header;
+        Node current = list.header;
         while (current != null) {
-            count++;
-            current = current.sig;
-        }
-
-        // Convertir a array
-        Producto[] result = new Producto[count];
-        current = sortedList.header;
-        int index = 0;
-        while (current != null) {
-            Producto producto = deserialize(current.value);
-            if (producto != null) {
-                result[index++] = producto;
+            Product product = deserialize(current.value);
+            if (product != null) {
+                productsList.add(product);
             }
-            current = current.sig;
+            current = current.next;
         }
+
+        productsList.sort((p1, p2) -> p1.getDescription().compareToIgnoreCase(p2.getDescription()));
+
+        Product[] result = new Product[productsList.size()];
+        for (int i = 0; i < productsList.size(); i++) {
+            result[i] = productsList.get(i);
+        }
+        
         return result;
     }
 
-    private ManagerList cloneList() {
-        ManagerList cloned = new ManagerList();
-        Node current = list.header;
-        while (current != null) {
-            cloned.addEnd(current.value);
-            current = current.sig;
-        }
-        return cloned;
-    }
-
-    private Node insertionSort(Node head) {
-        if (head == null || head.sig == null) {
-            return head;
-        }
-
-        Node sorted = null;
-        Node current = head;
-
-        while (current != null) {
-            Node next = current.sig;
-            sorted = insertSorted(sorted, current);
-            current = next;
-        }
-
-        return sorted;
-    }
-
-    private Node insertSorted(Node sorted, Node newNode) {
-        if (sorted == null || compareDescripcion(newNode.value, sorted.value) <= 0) {
-            newNode.sig = sorted;
-            return newNode;
-        }
-
-        Node current = sorted;
-        while (current.sig != null && compareDescripcion(newNode.value, current.sig.value) > 0) {
-            current = current.sig;
-        }
-
-        newNode.sig = current.sig;
-        current.sig = newNode;
-        return sorted;
-    }
-
-    private int compareDescripcion(String value1, String value2) {
-        Producto p1 = deserialize(value1);
-        Producto p2 = deserialize(value2);
-        
-        if (p1 == null || p2 == null) {
+    public int removeByDescriptionContains(String text) {
+        if (text == null || text.trim().isEmpty()) {
             return 0;
         }
-        
-        return p1.getDescripcion().compareToIgnoreCase(p2.getDescripcion());
-    }
-
-    public int removeByDescripcionContains(String texto) {
-        if (texto == null || texto.trim().isEmpty()) {
-            return 0;
-        }
-        String criterio = texto.trim().toLowerCase();
+        String criteria = text.trim().toLowerCase();
         int removed = 0;
         Node prev = null;
         Node current = list.header;
         while (current != null) {
-            Producto producto = deserialize(current.value);
-            boolean match = producto != null && producto.getDescripcion().toLowerCase().contains(criterio);
+            Product product = deserialize(current.value);
+            boolean match = product != null && product.getDescription().toLowerCase().contains(criteria);
             if (match) {
                 removed++;
                 if (prev == null) {
-                    list.header = current.sig;
+                    list.header = current.next;
                     current = list.header;
                 } else {
-                    prev.sig = current.sig;
-                    current = prev.sig;
+                    prev.next = current.next;
+                    current = prev.next;
                 }
                 continue;
             }
             prev = current;
-            current = current.sig;
+            current = current.next;
         }
         return removed;
     }
 
-    private String serialize(Producto producto) {
-        return producto.getDescripcion() + SEPARATOR
-                + producto.getPrecio() + SEPARATOR
-                + producto.getUnidadMedida();
+    private String serialize(Product product) {
+        return product.getDescription() + SEPARATOR
+                + product.getPrice() + SEPARATOR
+                + product.getUnity();
     }
 
-    private Producto deserialize(String value) {
+    private Product deserialize(String value) {
         if (value == null) {
             return null;
         }
@@ -170,8 +109,8 @@ public class ProductListAdapter {
             return null;
         }
         try {
-            double precio = Double.parseDouble(parts[1]);
-            return new Producto(parts[0], precio, parts[2]);
+            double price = Double.parseDouble(parts[1]);
+            return new Product(parts[0], price, parts[2]);
         } catch (NumberFormatException ex) {
             return null;
         }

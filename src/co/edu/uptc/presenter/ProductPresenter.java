@@ -1,46 +1,50 @@
 package co.edu.uptc.presenter;
 
-import co.edu.uptc.interfaces.IOrdenModel;
+import co.edu.uptc.interfaces.IOrderModel;
 import co.edu.uptc.interfaces.IProductView;
-import co.edu.uptc.pojo.Producto;
+import co.edu.uptc.pojo.Product;
 
 public class ProductPresenter {
-    private final IOrdenModel model;
+    private final IOrderModel model;
     private final IProductView view;
 
-    public ProductPresenter(IOrdenModel model, IProductView view) {
+    public ProductPresenter(IOrderModel model, IProductView view) {
         this.model = model;
         this.view = view;
     }
 
-    public void iniciar() {
-        boolean ejecutar = true;
-        while (ejecutar) {
-            int opcion = view.mostrarMenu();
-            switch (opcion) {
-                case 1:
-                    Producto producto = view.solicitarProducto();
-                    model.agregarProducto(producto);
-                    view.mostrarMensaje("Producto agregado.");
-                    break;
-                case 2:
-                    view.mostrarProductos(model.obtenerProductos(), "Lista de productos");
-                    break;
-                case 3:
-                    view.mostrarProductos(model.obtenerProductosOrdenadosPorNombre(), "Lista ordenada por nombre");
-                    break;
-                case 4:
-                    String texto = view.solicitarTexto("Ingrese nombre o parte del nombre a borrar: ");
-                    int eliminados = model.eliminarPorNombreParcial(texto);
-                    view.mostrarMensaje("Productos eliminados: " + eliminados);
-                    break;
-                case 0:
-                    ejecutar = false;
-                    break;
-                default:
-                    view.mostrarMensaje("Opcion invalida.");
-                    break;
+    public void start() {
+        boolean isRunning = true;
+        while (isRunning) {
+            int option = view.displayMenu();
+            switch (option) {
+                case 1 -> addProduct();
+                case 2 -> showAllProducts();
+                case 3 -> showSortedProducts();
+                case 4 -> deleteProducts();
+                case 0 -> isRunning = false;
+                default -> view.displayMessage("Opción inválida.");
             }
         }
+    }
+
+    private void addProduct() {
+        Product product = view.requestProduct();
+        model.addProduct(product);
+        view.displayMessage("Producto añadido.");
+    }
+
+    private void showAllProducts() {
+        view.displayProducts(model.getProducts(), "Lista de productos");
+    }
+
+    private void showSortedProducts() {
+        view.displayProducts(model.getProductsSortedByName(), "Lista ordenada por nombre");
+    }
+
+    private void deleteProducts() {
+        String text = view.requestText("Digite el nombre del producto a eliminar: ");
+        int deleted = model.removeByPartialName(text);
+        view.displayMessage("Productos eliminados: " + deleted);
     }
 }

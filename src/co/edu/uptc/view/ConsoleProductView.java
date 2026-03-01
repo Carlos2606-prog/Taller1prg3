@@ -1,86 +1,47 @@
 package co.edu.uptc.view;
 
-import java.util.Scanner;
-
 import co.edu.uptc.interfaces.IProductView;
-import co.edu.uptc.pojo.Producto;
+import co.edu.uptc.pojo.Product;
 
 public class ConsoleProductView implements IProductView {
-    private final Scanner scanner;
+
+    private final MenuCli menu;
+    private final InputHandler inputHandler;
+    private final ProductPrinter productPrinter;
 
     public ConsoleProductView() {
-        this.scanner = new Scanner(System.in);
+        this.menu = new MenuCli();
+        this.inputHandler = new InputHandler();
+        this.productPrinter = new ProductPrinter();
     }
 
     @Override
-    public int mostrarMenu() {
-        System.out.println("\n=== Administrador de productos ===");
-        System.out.println("1. Adicionar producto");
-        System.out.println("2. Listar productos");
-        System.out.println("3. Listar productos ordenados por nombre");
-        System.out.println("4. Borrar productos por nombre");
-        System.out.println("0. Salir");
-        return leerEntero("Seleccione una opcion: ");
+    public int displayMenu() {
+        return menu.start();
     }
 
     @Override
-    public Producto solicitarProducto() {
-        String descripcion = solicitarTexto("Descripcion: ");
-        double precio = leerDouble("Precio: ");
-        String unidad = solicitarTexto("Unidad de medida: ");
-        return new Producto(descripcion, precio, unidad);
+    public Product requestProduct() {
+        System.out.println("\n--- Nuevo Producto ---");
+        String description = inputHandler.readText("Descripción: ");
+        double price = inputHandler.readDouble("Precio: ");
+        String unit = inputHandler.readText("Unidad de medida: ");
+        
+        return new Product(description, price, unit);
     }
 
     @Override
-    public void mostrarProductos(Producto[] productos, String titulo) {
-        System.out.println("\n" + titulo + ":");
-        if (productos == null || productos.length == 0) {
-            System.out.println("Sin productos.");
-            return;
-        }
-        for (int i = 0; i < productos.length; i++) {
-            System.out.println((i + 1) + ". " + productos[i]);
-        }
+    public void displayProducts(Product[] products, String title) {
+        productPrinter.printList(products, title);
     }
 
     @Override
-    public void mostrarMensaje(String mensaje) {
-        System.out.println(mensaje);
+    public void displayMessage(String message) {
+        System.out.println(">> " + message);
     }
 
     @Override
-    public String solicitarTexto(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String input = scanner.nextLine().trim();
-            if (!input.isEmpty()) {
-                return input;
-            }
-            System.out.println("El texto no puede estar vacio.");
-        }
-    }
-
-    private int leerEntero(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String input = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException ex) {
-                System.out.println("Ingrese un numero valido.");
-            }
-        }
-    }
-
-    private double leerDouble(String mensaje) {
-        while (true) {
-            System.out.print(mensaje);
-            String input = scanner.nextLine().trim();
-            try {
-                return Double.parseDouble(input);
-            } catch (NumberFormatException ex) {
-                System.out.println("Ingrese un numero valido.");
-            }
-        }
+    public String requestText(String message) {
+        return inputHandler.readText(message);
     }
 }

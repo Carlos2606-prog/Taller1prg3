@@ -1,15 +1,15 @@
 package co.edu.uptc.interfaces;
 
-import co.edu.uptc.pojo.Producto;
+import co.edu.uptc.pojo.Product;
 
 public interface IProductView {
-    int mostrarMenu();
+    int displayMenu();
 
-    Producto solicitarProducto();
+    Product requestProduct();
 
-    void mostrarProductos(Producto[] productos, String titulo);
+    void displayProducts(Product[] products, String title);
 
-    void mostrarMensaje(String mensaje);
+    void displayMessage(String message);
 
-    String solicitarTexto(String mensaje);
+    String requestText(String message);
 }

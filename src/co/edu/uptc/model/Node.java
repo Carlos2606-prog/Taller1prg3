@@ -2,7 +2,7 @@ package co.edu.uptc.model;
 
 public class Node {
     String value;
-    Node sig = null;
+    Node next = null;
     public Node(String value) {
         this.value = value;
     }
